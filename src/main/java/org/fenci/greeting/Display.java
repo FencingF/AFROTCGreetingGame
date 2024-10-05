@@ -8,61 +8,102 @@ import java.awt.*;
 import java.util.HashMap;
 
 public class Display extends JFrame implements POCData {
+    private final HashMap<String, JLabel> imageLabelMap; // Stores references to the JLabels
+    private HashMap<String, String> POCimageMap;
+    private final JPanel imagePanel;
 
-    public static HashMap<String, String> POCimageMap;
     public static void main(String[] args) {
-        // Create an instance of the JFrame to display the images
-        new Display();
+        Display display = new Display();
+
+        display.addImage("Alcisto");
+        display.addImage("Escamilla");
+        display.addImage("Laravia");
+        display.addImage("Kimura");
+        display.addImage("Argueta");
+        display.addImage("Kinkead");
     }
 
     public Display() {
+        // Initialize the HashMap to store the JLabel components
+        imageLabelMap = new HashMap<>();
+
         // Initialize the HashMap to store image file paths
         iniList();
-        // Initialize the HashMap to store image file paths
-        POCimageMap = new HashMap<>();
-        POCimageMap.put("Alcisto", directory + "cadet2ndltalcisto.png");
-        POCimageMap.put("Escamilla", directory + "cadet2ndltescamilla.jpg");
-        POCimageMap.put("Kimura", directory + "cadet2ndltkimura.jpeg");
-        POCimageMap.put("Anderson", directory + "cadetcaptainanderson.jpg");
-        POCimageMap.put("Dimatteo", directory + "cadetcaptaindimatteo.png");
-        POCimageMap.put("Kinkead", directory + "cadetcaptainkinkead.jpg");
+        initializeList();
 
-        // Set up the JFrame to full screen
-        setExtendedState(JFrame.MAXIMIZED_BOTH); // This makes the frame full screen
+        // Set up the JFrame
+        setSize(900, 800); // Set a medium window size
         setTitle("POC Image Display");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new BorderLayout());
 
-        // Set a GridLayout with 2 rows and 3 columns
-        setLayout(new GridLayout(2, 3));
+        // Panel for images (this will be updated dynamically)
+        imagePanel = new JPanel(new GridLayout(2, 3)); // 2 rows, 3 columns for images
 
-        // Add images to the frame (6 images)
-        addImageLabel("Alcisto");
-        addImageLabel("Escamilla");
-        addImageLabel("Kimura");
-        addImageLabel("Anderson");
-        addImageLabel("Dimatteo");
-        addImageLabel("Kinkead");
+        // Panel for the text box at the bottom
+        JPanel textBoxPanel = new JPanel();
+        JTextField textBox = new JTextField(50); // Create a text box with a width of 50 columns
+        textBoxPanel.add(textBox);
+
+        // Add panels to the frame
+        add(imagePanel, BorderLayout.CENTER); // Top 2/3 of the screen for images
+        add(textBoxPanel, BorderLayout.SOUTH); // Bottom part for text box
 
         // Make the frame visible
         setVisible(true);
     }
 
-    private void addImageLabel(String name) {
-        // Create a JLabel to hold the image
-        JLabel imageLabel = new JLabel();
+    // Function to dynamically add an image to the display
+    public void addImage(String name) {
+        if (POCimageMap.containsKey(name)) {
+            // Create a JLabel to hold the image
+            JLabel imageLabel = new JLabel();
+            ImageIcon imageIcon = new ImageIcon(POCimageMap.get(name));
 
-        // Load the image as an ImageIcon
-        ImageIcon imageIcon = new ImageIcon(POCimageMap.get(name));
+            // Resize the image to fit within the slots (optional scaling)
+            Image image = imageIcon.getImage();
+            Image scaledImage = image.getScaledInstance(202, 250, Image.SCALE_SMOOTH);
+            ImageIcon scaledIcon = new ImageIcon(scaledImage);
 
-        // Resize the image to fit within the slots (optional scaling)
-        Image image = imageIcon.getImage();
-        Image scaledImage = image.getScaledInstance(400, 400, Image.SCALE_SMOOTH);
-        ImageIcon scaledIcon = new ImageIcon(scaledImage);
+            // Set the scaled image on the label
+            imageLabel.setIcon(scaledIcon);
+            imageLabel.setHorizontalAlignment(JLabel.CENTER);
+            imageLabel.setVerticalAlignment(JLabel.CENTER);
 
-        // Set the scaled image on the label
-        imageLabel.setIcon(scaledIcon);
+            // Add the label to the map for later reference
+            imageLabelMap.put(name, imageLabel);
 
-        // Add the label to the frame
-        add(imageLabel);
+            // Add the label to the panel and refresh the display
+            imagePanel.add(imageLabel);
+            imagePanel.revalidate();
+            imagePanel.repaint();
+        } else {
+            System.out.println("Image for " + name + " not found.");
+        }
+    }
+
+    // Function to remove an image from the display
+    public void removeImage(String name) {
+        if (imageLabelMap.containsKey(name)) {
+            JLabel imageLabel = imageLabelMap.get(name);
+
+            // Remove the label from the panel
+            imagePanel.remove(imageLabel);
+            imageLabelMap.remove(name);
+
+            // Refresh the panel after removing the image
+            imagePanel.revalidate();
+            imagePanel.repaint();
+        } else {
+            System.out.println("No image to remove for " + name);
+        }
+    }
+
+    // Initialize the image file paths
+    private void initializeList() {
+        POCimageMap = new HashMap<>();
+        for (POC poccorp : POCList.keySet()) {
+            POCimageMap.put(poccorp.getName(), POCList.get(poccorp)); //POCList.get(poccorp) returns the directory
+        }
     }
 }

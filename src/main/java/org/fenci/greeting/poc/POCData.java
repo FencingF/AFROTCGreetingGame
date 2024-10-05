@@ -42,8 +42,4 @@ public interface POCData {
         POCList.put(new POC("Zhivaga", "Major", 3), directory + "cadetmajorzhivaga.jpg");
 
     }
-
-    default POC createPOC(String name, String rank, int rankIndex) {
-        return new POC(name, rank, rankIndex);
-    }
 }
